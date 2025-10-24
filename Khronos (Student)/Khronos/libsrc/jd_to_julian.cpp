@@ -1,33 +1,30 @@
 /*
-khronos\jdn_to_gregorian.cpp
+khronos\jd_to_julian.cpp
 (c) Garth Santor
 Created: 2015-09-22
-Last Updated: 2015-09-22
 
-Khronos library 'gregorian::from_jdn' implementation.
+Khronos library 'julian::from_jd' implementation.
 */
 
-#include <khronos/gregorian_calendar.hpp>
+#include <khronos/julian_calendar.hpp>
 #include <khronos/timeofday.hpp>
 #include <cmath>
 
 namespace khronos {
 
 	/**
-	 * Convert Julian Day Number to Gregorian calendar date.
+	 * Convert Julian Day Number to Julian calendar date.
 	 * @param jd Julian Day Number
 	 * @param year Output: astronomical year
 	 * @param month Output: month [1..12]
 	 * @param day Output: day of month [1..31]
 	 */
-	void jd_to_gregorian(jd_t jd, year_t& year, month_t& month, day_t& day) {
-		// Add 0.5 to convert from JD (noon-based) to integer day number
+	void jd_to_julian(jd_t jd, year_t& year, month_t& month, day_t& day) {
 		long long jdn = static_cast<long long>(std::floor(jd + 0.5));
 
-		long long a = jdn + 32044;
-		long long b = (4 * a + 3) / 146097;
-		long long c = a - (146097 * b) / 4;
-
+		long long a = jdn + 32082;
+		long long b = (4 * a + 3) / 1461;
+		long long c = a - (1461 * b) / 4;
 		long long d = (4 * c + 3) / 1461;
 		long long e = c - (1461 * d) / 4;
 		long long m = (5 * e + 2) / 153;
@@ -38,7 +35,7 @@ namespace khronos {
 	}
 
 	/**
-	 * Convert Julian Day to Gregorian calendar date and time.
+	 * Convert Julian Day to Julian calendar date and time.
 	 * @param jd Julian Day with fractional part
 	 * @param year Output: astronomical year
 	 * @param month Output: month [1..12]
@@ -47,16 +44,13 @@ namespace khronos {
 	 * @param minute Output: minute [0..59]
 	 * @param second Output: second [0..60)
 	 */
-	void jd_to_gregorian(jd_t jd, year_t& year, month_t& month, day_t& day,
+	void jd_to_julian(jd_t jd, year_t& year, month_t& month, day_t& day,
 		hour_t& hour, minute_t& minute, second_t& second) {
-		// Get the date part
-		jd_to_gregorian(jd, year, month, day);
+		jd_to_julian(jd, year, month, day);
 
-		// Extract the time of day
 		double jd_floor = std::floor(jd + 0.5);
 		double tod_fraction = jd - (jd_floor - 0.5);
 
-		// Make sure tod_fraction is in [0,1)
 		if (tod_fraction < 0) tod_fraction += 1.0;
 		if (tod_fraction >= 1.0) tod_fraction -= 1.0;
 
