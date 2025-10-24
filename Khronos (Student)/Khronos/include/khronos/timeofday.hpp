@@ -16,19 +16,22 @@ Khronos library 'time-of-day' declarations.
 namespace khronos {
 	// LITERALS
 	/* UDL - converts an 'AM' hour to 'military' hour. */
-
-
-
+	constexpr hour_t operator ""_am(unsigned long long hours) {
+		return hours == 12 ? 0 : static_cast<hour_t>(hours);
+	}
 
 	/* UDL - converts an 'PM' hour to 'military' hour. */
-
+	constexpr hour_t operator ""_pm(unsigned long long hours) {
+		return hours == 12 ? 12 : static_cast<hour_t>(hours + 12);
+	}
 
 	/* Seconds per day. */
-
-
+	constexpr double SECONDS_PER_DAY = 24 * 60 * 60;
 
 	/* H:M:S.S to time-of-day [0.0..1.0) */
-
+	constexpr tod_t tod(hour_t hours, minute_t minutes, second_t seconds) {
+		return (hours * 3600.0 + minutes * 60.0 + seconds) / SECONDS_PER_DAY;
+	}
 
 	/**	Convert Time-of-day (TOD) to hours, minutes, seconds.  Civil days run from midnight to midnight.
 		@param tod [in] a time-of-day [0..1)
@@ -36,5 +39,12 @@ namespace khronos {
 		@param minutes [out] 0-59
 		@param seconds [out] [0.0..60.0)
 		*/
+	inline void jd_to_hms(tod_t tod, hour_t& hours, minute_t& minutes, second_t& seconds) {
+		double total_seconds = tod * SECONDS_PER_DAY;
+		hours = static_cast<hour_t>(total_seconds / 3600.0);
+		total_seconds -= hours * 3600.0;
+		minutes = static_cast<minute_t>(total_seconds / 60.0);
+		seconds = total_seconds - minutes * 60.0;
+	}
 
 } // end-of-namespace khronos
